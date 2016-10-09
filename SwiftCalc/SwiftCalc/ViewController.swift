@@ -21,8 +21,16 @@ class ViewController: UIViewController {
     
     // TODO: This looks like a good place to add some data structures.
     //       One data structure is initialized below for reference.
-    var someDataStructure: [String] = [""]
-    
+
+    //var numbers = ["0"]
+    var result = "0"
+    //var numbers2 = ["0"]
+    var result2 = "0"
+    var op = ""
+    var decimal = false
+    var opPressed = false
+    var error = false
+    let ops = ["/", "*", "-", "+"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,13 +54,18 @@ class ViewController: UIViewController {
     // TODO: A method to update your data structure(s) would be nice.
     //       Modify this one or create your own.
     func updateSomeDataStructure(_ content: String) {
-        print("Update me like one of those PCs")
+        if (!opPressed) {
+            result.append(content)
+        } else if (opPressed) {
+            result2.append(content)
+        }
+        
     }
     
     // TODO: Ensure that resultLabel gets updated.
     //       Modify this one or create your own.
     func updateResultLabel(_ content: String) {
-        print("Update me like one of those PCs")
+        resultLabel.text = content
     }
     
     
@@ -66,8 +79,29 @@ class ViewController: UIViewController {
     //       Modify this one or create your own.
     func intCalculate(a: Int, b:Int, operation: String) -> Int {
         print("Calculation requested for \(a) \(operation) \(b)")
-        return 0
+        var answer = 0
+        if (operation == "+") {
+            answer = a + b
+            print(answer)
+        } else if (operation == "-") {
+            answer = a - b
+            print("-")
+        } else if (operation == "*") {
+            answer = a * b
+            print("*")
+        } else if (operation == "/") {
+            print("a is \(a) and b is \(b)")
+//            if (b == 0) {
+//                error = true
+//                result = "Not a number"
+//            } else {
+            print("/")
+            answer = a / b
+            //}
+        }
+        return answer
     }
+
     
     // TODO: A general calculate method for doubles
     //       Modify this one or create your own.
@@ -79,18 +113,121 @@ class ViewController: UIViewController {
     // REQUIRED: The responder to a number button being pressed.
     func numberPressed(_ sender: CustomButton) {
         guard Int(sender.content) != nil else { return }
-        print("The number \(sender.content) was pressed")
-        // Fill me in!
-    }
+        if (!opPressed) {
+            if (result.characters.count < 7) {
+                if (result[result.startIndex] == "0" && !decimal) {
+                    result = sender.content
+                } else {
+                    //updateSomeDataStructure(sender.content)
+                    result.append(sender.content)
+                }
+            updateResultLabel(result)
+            }
+        } else if (opPressed) {
+            if (result2.characters.count < 7) {
+                if (result2[result2.startIndex] == "0" && !decimal) {
+                    result2 = sender.content
+                } else {
+                    //updateSomeDataStructure(sender.content)
+                    result2.append(sender.content)
+                }
+                updateResultLabel(result2)
+                }
+            }
+        }
     
     // REQUIRED: The responder to an operator button being pressed.
     func operatorPressed(_ sender: CustomButton) {
-        // Fill me in!
+        if ("C" == sender.content) {
+            result = "0"
+            result2 = "0"
+            decimal = false
+            opPressed = false
+            updateResultLabel(result)
+        } else if ("%" == sender.content && result.characters.count < 7) {
+            if (result[result.startIndex] == "0" && result.characters.count == 1) {
+                result = "0"
+                updateResultLabel(result)
+            } else {
+                var number: Double
+                number = Double(result)!
+                number = number / 100
+                if (!opPressed) {
+                    result = String(number)
+                } else if (opPressed) {
+                    result2 = String(number)
+                }
+                updateResultLabel(result)
+            }
+            
+        } else if ("+/-" == sender.content) {
+            if (result[result.startIndex] != "-" && result.characters.count < 7) {
+                if (result.characters.count == 1 && result[result.startIndex] == "0") {
+                    //do nothing
+                } else {
+                    result.insert("-", at: result.startIndex)
+                }
+            } else if  (result[result.startIndex] == "-"){
+                result.remove(at: result.startIndex)
+            }
+            updateResultLabel(result)
+           
+        } else if (ops.contains(sender.content)) {
+            if (opPressed) {
+//                if (error) {
+//                    result2 = "0"
+//                    op = ""
+//                    error = false
+//                } else {
+                op = sender.content
+                result = String(intCalculate(a: Int(result)!, b: Int(result2)!,operation: op))
+                result2 = "0"
+                //opPressed = false
+               // }
+            } else {
+                op = sender.content
+                opPressed = true
+            }
+        } else if ("=" == sender.content) {
+            if (decimal) {
+                    result = String(calculate(a: result, b: result2, operation:     op))
+            } else if (!decimal) {
+                result = String(intCalculate(a: Int(result)!, b: Int(result2)!, operation: op))
+                result2 = "0"
+                }
+            opPressed = false
+        }
+        updateResultLabel(result)
     }
     
     // REQUIRED: The responder to a number or operator button being pressed.
     func buttonPressed(_ sender: CustomButton) {
-       // Fill me in!
+        if (!opPressed) {
+            if (result.characters.count < 7) {
+                if ("." == sender.content && !decimal) {
+                    decimal = true
+                    updateSomeDataStructure(sender.content)
+                }
+                if (decimal && "0" == sender.content) {
+                    updateSomeDataStructure(sender.content)
+                } else if ("0" == sender.content && result[result.startIndex] != "0") {
+                    updateSomeDataStructure(sender.content)
+                }
+                updateResultLabel(result)
+
+            } else if (result2.characters.count < 7) {
+                if ("." == sender.content && !decimal) {
+                    decimal = true
+                    updateSomeDataStructure(sender.content)
+                }
+                if (decimal && "0" == sender.content) {
+                    updateSomeDataStructure(sender.content)
+                } else if ("0" == sender.content && result[result.startIndex] != "0") {
+                    updateSomeDataStructure(sender.content)
+                }
+                updateResultLabel(result2)
+            }
+        }
     }
     
     // IMPORTANT: Do NOT change any of the code below.
